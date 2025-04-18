@@ -11,10 +11,10 @@ export default function Layout() {
           <Typography variant="h6" sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
             Mini PMS
           </Typography>
-          <Button color="inherit" onClick={() => navigate('/boards')}>Boards</Button>
-          <Button color="inherit" onClick={() => navigate('/issues')}>All Tasks</Button>
+          <Button color="inherit" onClick={() => navigate('/boards')}>Проекты</Button>
+          <Button color="inherit" onClick={() => navigate('/issues')}>Все задачи</Button>
           <Button color="inherit" onClick={() => alert('🔧 Open Task Creation Modal (to do)')}>
-            + Create Task
+            + Создать задачу
           </Button>
         </Toolbar>
       </AppBar>

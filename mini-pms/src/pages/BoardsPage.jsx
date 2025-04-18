@@ -16,7 +16,7 @@ export default function BoardsPage() {
         const data = await getAllBoards(getSignal());
         console.log('🔍 Fetched boards:', data);
         console.log('Object keys:', Object.keys(data));
-  
+          console.log("board",data)
         if (Array.isArray(data)) {
           setBoards(data);
         } else {
@@ -62,3 +62,7 @@ export default function BoardsPage() {
     </Grid>
   );
 }
+
+
+
+
