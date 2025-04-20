@@ -1,10 +1,10 @@
 import api from './axios';
 
-export const getAllTasks = (signal) =>
-  api.get('/tasks', { signal }).then(res => res.data);
+export const getAllTasks = () =>
+  api.get('/tasks').then(res => res.data);
 
-export const getTaskById = (taskId, signal) =>
-  api.get(`/tasks/${taskId}`, { signal }).then(res => res.data);
+export const getTaskById = (taskId) =>
+  api.get(`/tasks/${taskId}`).then(res => res.data);
 
 export const createTask = (taskData) =>
   api.post('/tasks/create', taskData).then(res => res.data);

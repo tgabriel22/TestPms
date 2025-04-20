@@ -1,7 +1,7 @@
 import api from './axios';
 
-export const getAllUsers = (signal) =>
-  api.get('/users', { signal }).then(res => res.data);
+export const getAllUsers = () =>
+  api.get('/users').then(res => res.data.data); 
 
-export const getUserTasks = (userId, signal) =>
-  api.get(`/users/${userId}/tasks`, { signal }).then(res => res.data);
+export const getUserTasks = (userId) =>
+  api.get(`/users/${userId}/tasks`).then(res => res.data);
