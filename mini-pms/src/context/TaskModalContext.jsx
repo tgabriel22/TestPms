@@ -1,4 +1,3 @@
-// src/context/TaskModalContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import TaskModal from '../components/TaskModal';
 import { getAllUsers } from '../api/usersService';
@@ -10,8 +9,6 @@ export const TaskModalProvider = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
 
-  // const handleOpen = () => setOpen(true);
-  // const handleClose = () => setOpen(false);
 
   const [initialData, setInitialData] = useState(null);
 

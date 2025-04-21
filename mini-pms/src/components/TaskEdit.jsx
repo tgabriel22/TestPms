@@ -10,8 +10,8 @@ import {
     Box
   } from '@mui/material';
   import { useState, useEffect } from 'react';
-  import { getAllBoards } from '../api/boardsService';
-  import { getAllUsers } from '../api/usersService';
+  // import { getAllBoards } from '../api/boardsService';
+  // import { getAllUsers } from '../api/usersService';
 import { updateTask } from '../api/tasksService';
 import { useNavigate } from "react-router";
 import { useAppData } from '../context/appDataContext';
@@ -49,7 +49,7 @@ console.log("users",users)
   
     return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle>{form.id ? 'Edit Task' : 'Редактировать Задачу'}</DialogTitle>
+        <DialogTitle>{form.id ? 'Edit Task' : 'Редактировать адачу'}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} mt={0.5}>
             <Grid item xs={12}>

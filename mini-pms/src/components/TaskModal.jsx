@@ -9,10 +9,7 @@ import {
   Grid
 } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { getAllBoards } from '../api/boardsService';
-import { getAllUsers } from '../api/usersService';
 import { createTask } from '../api/tasksService';
-import { useOutletContext } from "react-router-dom";
 import { useAppData } from '../context/appDataContext';
 
 
@@ -51,22 +48,24 @@ export default function TaskModal() {
 
   return (
     <>
-    <Button 
-    color="inherit"
-    onClick={() => {
-      setForm({
-        title: '',
-        description: '',
-        priority: '',
-        status: '',
-        assigneeId: '',
-        boardId: '',
-          });
-          setOpen(true);
-        }}
-      >
-            + Создать задачу
-    </Button>
+    <Button
+      id="global-create-task-button"
+      color="inherit"
+      sx={{ color: 'white' }}
+      onClick={() => {
+        setForm({
+          title: '',
+          description: '',
+          priority: '',
+          status: '',
+          assigneeId: '',
+          boardId: '',
+        });
+        setOpen(true);
+      }}
+    >
+      + Создать задачу
+  </Button>
     <Dialog open={open} onClose={()=>setOpen(false)}  fullWidth maxWidth="sm">
       <DialogTitle >  Создать Задачу</DialogTitle>
       <DialogContent dividers>

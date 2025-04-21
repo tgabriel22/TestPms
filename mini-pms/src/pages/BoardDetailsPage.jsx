@@ -6,15 +6,11 @@ import {
   Typography,
   CircularProgress,
   Box,
-  AppBar,
-  Toolbar,
-  Button 
 } from '@mui/material';
 import { getBoardTasks } from '../api/boardsService';
 import {updateTask } from "../api/tasksService";
-import { useTaskModal } from '../context/TaskModalContext';
 import EditTaskModal from '../components/TaskEdit';
-import TaskModal from '../components/TaskModal';
+
 
 
 function getTasksFilter(tasks){

@@ -12,11 +12,12 @@ import {
   CircularProgress,
   Button,
 } from '@mui/material';
-import { getAllTasks } from '../api/tasksService';
-import { getAllBoards } from '../api/boardsService';
+// import { getAllTasks } from '../api/tasksService';
+// import { getAllBoards } from '../api/boardsService';
 import EditTaskModal from '../components/TaskEdit';
-import {updateTask } from "../api/tasksService";
+// import {updateTask } from "../api/tasksService";
 import { useAppData } from '../context/appDataContext';
+import TaskModal from '../components/TaskModal';
 
 export default function TasksPage() {
   const [open,setOpen]=useState(false)
@@ -229,8 +230,30 @@ console.log("rerender")
               </Grid>
             ))}
           </Grid>
+          <Button
+            variant="contained"
+            sx={{
+              position: 'fixed',
+              bottom: 32,
+              right: 32,
+              borderRadius: '50%',
+              minWidth: '56px',
+              minHeight: '56px',
+              fontSize: '24px',
+              zIndex: 1000,
+            }}
+            onClick={() => {
+              const createButton = document.getElementById('global-create-task-button');
+              if (createButton) createButton.click(); // trigger the header button
+            }}
+          >
+          +
+        </Button >
+
         </>
       )}
+      <TaskModal />
+
     </Box>
  );
 }
