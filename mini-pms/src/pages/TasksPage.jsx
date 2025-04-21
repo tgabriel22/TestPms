@@ -93,71 +93,74 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
         🧾 Task Management
       </Typography>
       <Paper sx={{ p: 3, mb: 3, boxShadow: 3 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={3}>
-            <TextField
-              label="Search (Task Name or Assignee)"
-              name="search"
-              value={filters.search}
-              onChange={(e) => {
-                const value = e.target.value.toLowerCase();
-                setFilters((prev) => ({
-                  ...prev,
-                  search: value,
-                }));
-              }}
-              fullWidth
-              variant="outlined"
-            />
+        <Grid container spacing={2} alignItems="center" justifyContent="space-between">
+          {/* Left side filters (TextField + Selects) */}
+          <Grid item xs={12} md={9}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Search (Task Name or Assignee)"
+                  name="search"
+                  value={filters.search}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, search: e.target.value.toLowerCase() }))
+                  }
+                  fullWidth
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    name="status"
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                    label="Status"
+                    sx={{ minWidth: 100 }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    <MenuItem value="Backlog">Backlog</MenuItem>
+                    <MenuItem value="InProgress">In Progress</MenuItem>
+                    <MenuItem value="Done">Done</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel>Board</InputLabel>
+                  <Select
+                    name="board"
+                    value={filters.board}
+                    onChange={handleFilterChange}
+                    label="Board"
+                    sx={{ minWidth: 100 }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {boards.map((board) => (
+                      <MenuItem key={board.id} value={board.name}>
+                        {board.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Status</InputLabel>
-              <Select
-                name="status"
-                value={filters.status}
-                onChange={handleFilterChange}
-                label="Status"
-                sx={{ minWidth: 100 }}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="Backlog">Backlog</MenuItem>
-                <MenuItem value="InProgress">In Progress</MenuItem>
-                <MenuItem value="Done">Done</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Board</InputLabel>
-              <Select
-                name="board"
-                value={filters.board}
-                onChange={handleFilterChange}
-                label="Board"
-                sx={{ minWidth: 100 }}
-              >
-                <MenuItem value="">All</MenuItem>
-                {boards.map((board) => (
-                  <MenuItem key={board.id} value={board.name}>
-                    {board.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={3}>
+
+          {/* Right aligned Clear Filters button */}
+          <Grid item xs={12} md="auto">
             <Button
               variant="contained"
               color="secondary"
               onClick={handleClearFilters}
-              fullWidth
-              sx={{ mt: { xs: 2, md: 2 } }}
+              sx={{ mt: { xs: 2, md: 0 } }}
             >
               Clear Filters
             </Button>
           </Grid>
         </Grid>
+
       </Paper>
       {loading ? (
         <Box
@@ -175,15 +178,16 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
           <Typography variant="h5" gutterBottom>
             Filtered Tasks
           </Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} backgroundColor="red">
             {filteredTasks.map((task) => (
-              <Grid item xs={12} md={4} key={task.id}>
-                <Paper
+              <Grid item xs={12} md={4} key={task.id} backgroundColor="white">
+                <Paper 
                   sx={{
                     p: 2,
                     boxShadow: 3,
                     borderRadius: 2,
-                    backgroundColor: '#f9f9f9',
+                    // backgroundColor: '#f9f9f9',
+                    backgroundColor:"green",
                     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     '&:hover': {
                       transform: 'scale(1.02)',

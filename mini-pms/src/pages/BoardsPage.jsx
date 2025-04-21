@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { data, useNavigate } from 'react-router-dom';
-import { Card, CardContent, Typography, Grid, CircularProgress } from '@mui/material';
+import { Card, CardContent, Typography, Grid, CircularProgress,Box } from '@mui/material';
 import { getAllBoards } from '../api/boardsService';
 import { getAllUsers } from '../api/usersService';
+
 
 
 export default function BoardsPage() {
@@ -68,30 +69,35 @@ export default function BoardsPage() {
 
   return (
     <>
-
-      <Grid container spacing={3} backgroundColor="red">
-        {boards.map((board) => (
-          <Grid item xs={12} sm={6} md={4} key={board.id}>
-            <Card
-              onClick={() => navigate(`/board/${board.id}`)}
-              sx={{
-                cursor: 'pointer',
-                transition: '0.3s',
-                '&:hover': { boxShadow: 6 }
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6">{board.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {board.description || 'No description'}
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  🧩 Tasks: {board.taskCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+      <Grid container justifyContent="center" spacing={3} sx={{ px: 2 }}>
+        <Grid item xs={12} sm={10} md={8} lg={6}>
+          {boards.map((board) => (
+                  
+            <Box key={board.id} my={2}>
+              <Card
+                key={board.id}
+                onClick={() => navigate(`/board/${board.id}`)}
+                sx={{
+                  cursor: 'pointer',
+                  transition: '0.3s',
+                  '&:hover': { boxShadow: 6 },
+                  backgroundColor: 'light-gray',
+                  width: '100%',
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6">{board.name}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {board.description || 'No description'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    🧩 Tasks: {board.taskCount}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          ))}
+        </Grid>
       </Grid>
     </>
   );
