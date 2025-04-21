@@ -9,6 +9,9 @@ import {
 } from '@mui/material';
 import { getBoardTasks } from '../api/boardsService';
 import {updateTask } from "../api/tasksService";
+import { useTaskModal } from '../context/TaskModalContext';
+import EditTaskModal from '../components/TaskEdit';
+
 
 
 
@@ -25,11 +28,14 @@ function getTasksFilter(tasks){
 
 export default function BoardDetailsPage() {
   const { id } = useParams();
+  // const { openModal } = useTaskModal();
+  const [openModal,setOpenModal]= useState(false)
   const [tasks, setTasks] = useState();
   const [loading, setLoading] = useState(true);
   const dragItemIndex = useRef(null)
   const dragOvertItemIndex = useRef(null)
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [selectedTask,setSelectedTask]= useState()
 
 
 
@@ -96,45 +102,89 @@ export default function BoardDetailsPage() {
       return { fromArray: op1, toArray: op2 }
     }
 
-    function handleDrop() {
+  async function swapAndUpdateTask({from,to,toArr,fromArr,toIndex,fromIndex}){
+    if (from.status == to.status) {
+      const cloneArray = tasks[from.status]
+      const swapped = swapSameArrayItems(cloneArray, from.index, to.index)
+      return {
+        ...tasks,
+        [from.status]:swapped
+      }
+    }
+    console.log({from,to,toArr,fromArr,toIndex,fromIndex})
+    const { fromArray ,toArray}=swapDifferentArrayItems({fromArray:fromArr,toArray:toArr,fromIndex:fromIndex,toIndex:toIndex})
+    const toElement = toArr[toIndex]
+        toElement.status = from.status
+        const fromElement = fromArr[fromIndex]
+        fromElement.status = to.status
+    console.log({fromElement,toElement})
+      const fromData = {
+        "assigneeId": Number(fromElement.assignee.id),
+        "description": fromElement.description,
+        "priority": fromElement.priority,
+        "status": fromElement.status,
+        "title": fromElement.title,
+        "boardId":id
+      }
+
+      const toData = {
+        "assigneeId": Number(fromElement.assignee.id),
+        "description": fromElement.description,
+        "priority": fromElement.priority,
+        "status": fromElement.status,
+        "title": fromElement.title,
+        "boardId":id
+      }
+      console.log({toData,fromData})
+        await updateTask(fromElement.id,fromData)
+        await updateTask(toElement.id,toData)
+        
+        console.log({fromArray ,toArray})
+        return {
+          ...tasks,
+          [from.status]:fromArray,
+          [to.status]:toArray
+        }
+  }
+
+    async function handleDrop() {
       const from = dragItemIndex.current
       const to = dragOvertItemIndex.current
       const fromIndex = from.index
       const toIndex = to.index
       const fromArr= [...tasks[from.status]]
       const toArr = [...tasks[to.status]]
-      console.log("tasks",tasks)
-      setTasks(async (prev) => {
-        if (from.status == to.status) {
-          const cloneArray = prev[from.status]
-          const swapped = swapSameArrayItems(cloneArray, from.index, to.index)
-          return {
-            ...prev,
-            [from.status]:swapped
-          }
-        }
-        const toElement = toArr[toIndex]
-        toElement.status = from.status
-        const fromElement = fromArr[fromIndex]
-        fromElement.status = to.status
-        await updateTask(fromElement.id,fromElement)
-        await updateTask(toElement.id,toElement)
-        const { fromArray ,toArray}=swapDifferentArrayItems({array1:fromArr,array2:toArr,i:fromIndex,j:toIndex})
-        console.log({fromArray ,toArray})
-        return {
-          ...prev,
-          [from.status]:fromArray,
-          [to.status]:toArray
-        }
-        
-      })
-      console.log("tasks",tasks)
+      console.log("tasks", tasks)
+      const updatedData = await swapAndUpdateTask({from,to,toArr,fromArr,toIndex,fromIndex})
+      setTasks(updatedData)
   
     }
+
+
+  const handleSelectedTask = (task) => {
+    setOpenModal(true)
+    setSelectedTask(task)
+  }
+
+  const handleUpdateTaskList = ({fromId,fromStatus,newTask}) => {
+    console.log({ fromStatus, newTask })
+    console.log("task updated", tasks)
+    const toStatus = newTask.status
+    console.log({toStatus,fromStatus})
+    const removeTask = tasks[fromStatus]?.filter(task => task.id !== fromId)
+    const addTask = tasks[toStatus]?.push(newTask)
+    console.log({removeTask,addTask})
+    setTasks((prev) => ({
+      ...prev,
+      [fromStatus]: removeTask,
+      [toStatus]:tasks[toStatus]
+    }))
+  }
       if (loading) return <CircularProgress sx={{ m: 3 }} />;
 
   return (
     <Grid container spacing={2}>
+      {openModal && (<EditTaskModal task={selectedTask} updateTaskList={(value)=>handleUpdateTaskList(value)} open={openModal} onClose={() => setOpenModal(false)} boardId={id} />)}
       {Object.keys(tasks).map((status) => (
         <Grid item xs={12} md={2} key={status} >
           <Paper  sx={{ p: 2, minHeight: '80vh' }}>
@@ -145,10 +195,11 @@ export default function BoardDetailsPage() {
             {tasks[status]?.map((task,index) => (
                 <Box
                   draggable
+                onClick={() => handleSelectedTask(task)}
                 onDragStart={()=>{handleDragStart({index,status})}}
                 onDragOver={(e)=>{handleDragOver({e,index,status})}}
                 onDragEnd={(e)=>handleDragEnd(e)}
-                 onDrop={handleDrop}
+                 onDrop={async()=>await handleDrop()}
                   key={index}
                   sx={{
                     border: '1px solid #ccc',

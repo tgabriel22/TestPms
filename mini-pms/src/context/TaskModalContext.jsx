@@ -10,8 +10,16 @@ export const TaskModalProvider = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // const handleOpen = () => setOpen(true);
+  // const handleClose = () => setOpen(false);
+
+  const [initialData, setInitialData] = useState(null);
+
+  const openModal = (task = null) => {
+    setInitialData(task);
+    setOpen(true);
+  };
+  const closeModal = () => setOpen(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -37,9 +45,9 @@ export const TaskModalProvider = ({ children }) => {
   };
 
   return (
-    <TaskModalContext.Provider value={{ handleOpen }}>
+    <TaskModalContext.Provider value={{ openModal }}>
       {children}
-      <TaskModal open={open} onClose={handleClose} onSubmit={handleSubmit} users={users} />
+      <TaskModal open={open} onClose={closeModal} onSubmit={handleSubmit} users={users} initialData={initialData}/>
     </TaskModalContext.Provider>
   );
 };
