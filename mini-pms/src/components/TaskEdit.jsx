@@ -63,7 +63,7 @@ import {
 
     const handleUpdateTask = async () => {
        const response= await updateTask(task.id,form)
-       updateTaskList({fromId:task.id,fromStatus:task.status,newTask:{...form,id:task.id}})
+       updateTaskList({fromId:task.id,fromStatus:task.status,newTask:{...form,id:task.id, assignee:task.assignee}})
        onClose()
        console.log("response form update task",response)
     }

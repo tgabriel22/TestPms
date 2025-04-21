@@ -10,13 +10,17 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { getAllBoards } from '../api/boardsService';
+import { getAllUsers } from '../api/usersService';
+import { createTask } from '../api/tasksService';
+
 
 const priorities = ['Low', 'Medium', 'High'];
 const statuses = ['Backlog', 'InProgress', 'Done'];
 
-export default function TaskModal({ open, onClose, onSubmit, initialData = {}, users = [] }) {
+export default function TaskModal() {
   const [boards, setBoards] = useState([]);
-
+  const [users, setUsers] = useState([]);
+  const [open,setOpen]= useState(false)
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -24,24 +28,23 @@ export default function TaskModal({ open, onClose, onSubmit, initialData = {}, u
     status: 'Backlog',
     assigneeId: '',
     boardId: '',
-    ...initialData,
   });
 
-  // useEffect(() => {
-  //   setForm({
-  //     title: '',
-  //     description: '',
-  //     priority: 'Medium',
-  //     status: 'Backlog',
-  //     assigneeId: '',
-  //     boardId: '',
-  //     ...initialData,
-  //   });
-  // }, [initialData]);
 
   
   
-  
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await getAllUsers();
+        setUsers(data);
+      } catch (err) {
+        console.error('Failed to fetch users:', err.message);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   useEffect(() => {
     const fetchBoards = async () => {
@@ -65,13 +68,23 @@ export default function TaskModal({ open, onClose, onSubmit, initialData = {}, u
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    onSubmit(form);
+  const handleSubmit = async (formData) => {
+    try {
+      await createTask(form);
+      console.log('✅ Task created!');
+      setOpen(false);
+    } catch (err) {
+      console.error('❌ Failed to create task:', err.message);
+    }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{form.id ? 'Edit Task' : 'Create Task'}</DialogTitle>
+    <>
+    <Button color="inherit" onClick={()=>setOpen(true)}>
+            + Создать задачу
+    </Button>
+    <Dialog open={open} onClose={()=>setOpen(false)}  fullWidth maxWidth="sm">
+      <DialogTitle > Create Task</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2} mt={0.5}>
           <Grid item xs={12}>
@@ -168,11 +181,12 @@ export default function TaskModal({ open, onClose, onSubmit, initialData = {}, u
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {form.id ? 'Update' : 'Create'}
+        <Button onClick={()=>setOpen(false)}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained" >
+         Create
         </Button>
       </DialogActions>
     </Dialog>
+    </>
   );
 }

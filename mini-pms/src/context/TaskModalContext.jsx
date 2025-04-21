@@ -15,7 +15,7 @@ export const TaskModalProvider = ({ children }) => {
 
   const [initialData, setInitialData] = useState(null);
 
-  const openModal = (task = null) => {
+  const openModal = () => {
     setInitialData(task);
     setOpen(true);
   };
@@ -47,7 +47,7 @@ export const TaskModalProvider = ({ children }) => {
   return (
     <TaskModalContext.Provider value={{ openModal }}>
       {children}
-      <TaskModal open={open} onClose={closeModal} onSubmit={handleSubmit} users={users} initialData={initialData}/>
+      <TaskModal open={open} onOpen={openModal} onClose={closeModal} onSubmit={handleSubmit} users={users} initialData={initialData}/>
     </TaskModalContext.Provider>
   );
 };

@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
 import { useTaskModal } from '../context/TaskModalContext';
+import TaskModal from './TaskModal';
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -15,10 +16,7 @@ export default function Layout() {
           </Typography>
           <Button color="inherit" onClick={() => navigate('/boards')}>Проекты</Button>
           <Button color="inherit" onClick={() => navigate('/issues')}>Все задачи</Button>
-          {/* (handleOpen) => alert('🔧 Open Task Creation Modal (to do)') */}
-          <Button color="inherit" onClick={handleOpen}>
-            + Создать задачу
-          </Button>
+          <TaskModal/>
         </Toolbar>
       </AppBar>
 

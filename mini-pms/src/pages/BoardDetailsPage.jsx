@@ -167,63 +167,122 @@ export default function BoardDetailsPage() {
   }
 
   const handleUpdateTaskList = ({fromId,fromStatus,newTask}) => {
-    console.log({ fromStatus, newTask })
-    console.log("task updated", tasks)
     const toStatus = newTask.status
-    console.log({toStatus,fromStatus})
-    const removeTask = tasks[fromStatus]?.filter(task => task.id !== fromId)
-    const addTask = tasks[toStatus]?.push(newTask)
-    console.log({removeTask,addTask})
-    setTasks((prev) => ({
+    if (fromStatus !== toStatus) {
+      const removeTask = tasks[fromStatus]?.filter(task => task.id !== fromId)
+      const addTask = tasks[toStatus]?.push(newTask)
+      console.log({removeTask,addTask})
+      return void setTasks((prev) => ({
+        ...prev,
+        [fromStatus]: removeTask,
+        [toStatus]:tasks[toStatus]
+      }))
+    }
+    const updateTask = tasks[fromStatus]?.map(task => {
+      if (task.id == fromId) {
+        return newTask
+      }
+      return task
+    })
+    setTasks(prev => ({
       ...prev,
-      [fromStatus]: removeTask,
-      [toStatus]:tasks[toStatus]
+      [fromStatus]:updateTask
     }))
   }
       if (loading) return <CircularProgress sx={{ m: 3 }} />;
 
-  return (
-    <Grid container spacing={2}>
-      {openModal && (<EditTaskModal task={selectedTask} updateTaskList={(value)=>handleUpdateTaskList(value)} open={openModal} onClose={() => setOpenModal(false)} boardId={id} />)}
-      {Object.keys(tasks).map((status) => (
-        <Grid item xs={12} md={2} key={status} >
-          <Paper  sx={{ p: 2, minHeight: '80vh' }}>
-            <Typography variant="h6" align="center" gutterBottom>
-              {status}
-            </Typography>
-            <Box  sx={{ minHeight: '70vh' }}>
-            {tasks[status]?.map((task,index) => (
-                <Box
-                  draggable
-                onClick={() => handleSelectedTask(task)}
-                onDragStart={()=>{handleDragStart({index,status})}}
-                onDragOver={(e)=>{handleDragOver({e,index,status})}}
-                onDragEnd={(e)=>handleDragEnd(e)}
-                 onDrop={async()=>await handleDrop()}
-                  key={index}
+      return (
+        <Grid container spacing={2} sx={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
+          {openModal && (
+            <EditTaskModal
+              task={selectedTask}
+              updateTaskList={(value) => handleUpdateTaskList(value)}
+              open={openModal}
+              onClose={() => setOpenModal(false)}
+              boardId={id}
+            />
+          )}
+          {Object.keys(tasks).map((status) => (
+            <Grid
+              item
+              xs={12}
+              md={3}
+              key={status}
+              sx={{
+                flex: '0 0 auto', // Prevent columns from shrinking
+                maxWidth: '300px', // Set a fixed width for each column
+              }}
+            >
+              <Paper
+                sx={{
+                  p: 2,
+                  minHeight: '80vh',
+                  backgroundColor: '#f4f5f7', // Light background for Kanban columns
+                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for columns
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  align="center"
+                  gutterBottom
                   sx={{
-                    border: '1px solid #ccc',
-                    borderRadius: 1,
-                    p: 1,
-                    mb: 1,
-                    opacity: 1,
-                    marginTop: index===1 ? 2 : 0,
-                    backgroundColor: draggedIndex === index ? 'lightGray' : '#fff',
-                    cursor: 'grab'
+                    fontWeight: 'bold',
+                    color: '#333',
+                    borderBottom: '2px solid #ddd',
+                    pb: 1,
                   }}
                 >
-                  <Typography variant="subtitle1">{task.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {task.description}
-                  </Typography>
+                  {status}
+                </Typography>
+                <Box
+                  sx={{
+                    minHeight: '70vh',
+                    overflowY: 'auto', // Allow scrolling for tasks
+                    padding: 1,
+                  }}
+                >
+                  {tasks[status]?.map((task, index) => (
+                    <Box
+                      draggable
+                      onClick={() => handleSelectedTask(task)}
+                      onDragStart={() => {
+                        handleDragStart({ index, status });
+                      }}
+                      onDragOver={(e) => {
+                        handleDragOver({ e, index, status });
+                      }}
+                      onDragEnd={(e) => handleDragEnd(e)}
+                      onDrop={async () => await handleDrop()}
+                      key={index}
+                      sx={{
+                        border: '1px solid #ccc',
+                        borderRadius: 1,
+                        p: 2,
+                        mb: 2,
+                        backgroundColor: draggedIndex === index ? '#e0e0e0' : '#fff',
+                        cursor: 'grab',
+                        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Subtle shadow for tasks
+                        transition: 'background-color 0.2s ease',
+                        '&:hover': {
+                          backgroundColor: '#f9f9f9',
+                        },
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                        {task.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {task.description}
+                      </Typography>
+                    </Box>
+                  ))}
                 </Box>
-              ))}
-            </Box>
-          </Paper>
+              </Paper>
+            </Grid>
+          ))}
         </Grid>
-      ))}
-    </Grid>
-  );
+      );
 }
 
 
