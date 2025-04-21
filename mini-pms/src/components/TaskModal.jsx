@@ -12,14 +12,17 @@ import { useState, useEffect } from 'react';
 import { createTask } from '../api/tasksService';
 import { useAppData } from '../context/appDataContext';
 
-
+// Возможные значения для приоритета и статуса
 const priorities = ['Low', 'Medium', 'High'];
 const statuses = ['Backlog', 'InProgress', 'Done'];
 
 export default function TaskModal() {
-  const {boards,users}= useAppData()
+  const {boards,users}= useAppData()// Получаем список досок и пользователей из глобального контекста
 
+  // Локальное состояние для управления модальным окном
   const [open,setOpen]= useState(false)
+
+  // Начальное состояние формы задачи
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -30,7 +33,7 @@ export default function TaskModal() {
   });
 
 
-
+   // Обработка изменений в полях формы
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -48,6 +51,7 @@ export default function TaskModal() {
 
   return (
     <>
+     {/* Кнопка, которая открывает модальное окно создания задачи */}
     <Button
       id="global-create-task-button"
       color="inherit"

@@ -12,7 +12,7 @@ import {updateTask } from "../api/tasksService";
 import EditTaskModal from '../components/TaskEdit';
 
 
-
+// Функция для фильтрации задач по статусу
 function getTasksFilter(tasks){
   return {
     Backlog: tasks?.filter(q => q.status == "Backlog")?.sort((a,b)=>a.id-b.id)||[],
@@ -22,18 +22,20 @@ function getTasksFilter(tasks){
 }
 
 export default function BoardDetailsPage() {
-  const { id } = useParams();
+  const { id } = useParams(); // Получаем ID доски из URL
 
-  const [openModal,setOpenModal]= useState(false)
+  const [openModal,setOpenModal]= useState(false) // Состояние модального окна
   const [tasks, setTasks] = useState();
   const [loading, setLoading] = useState(true);
+
+   // Переменные для drag-and-drop
   const dragItemIndex = useRef(null)
   const dragOvertItemIndex = useRef(null)
   const [draggedIndex, setDraggedIndex] = useState(null);
-  const [selectedTask,setSelectedTask]= useState()
+  const [selectedTask,setSelectedTask]= useState() // Выбранная задача для редактирования
 
 
-
+     // Загрузка задач при монтировании компонента
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -51,7 +53,7 @@ export default function BoardDetailsPage() {
     fetchTasks();
   }, [id]);
 
-
+  // Начало перетаскивания
   function handleDragStart({index,status}) {
     dragItemIndex.current = {
       index,
@@ -59,7 +61,7 @@ export default function BoardDetailsPage() {
     }
     setDraggedIndex(index)
   }
-
+ // Элемент на который наводимся
   function handleDragOver({e,index,status}) {
     e.preventDefault()
     dragOvertItemIndex.current={index,status}
@@ -72,7 +74,7 @@ export default function BoardDetailsPage() {
       dragOvertItemIndex.current=null
   
     }
-
+// Меняем задачи внутри одного столбца
     function swapSameArrayItems(arr,i,j){
       return arr.map((item,index)=>{
         if(index ===i)return arr[j]
@@ -80,7 +82,7 @@ export default function BoardDetailsPage() {
         return item
       })
     }
-
+ // Меняем задачи между столбцами
     function swapDifferentArrayItems({fromArray,toArray,fromIndex,toIndex}){
       const op1 = fromArray.map((item,idx)=>{
         if (idx == fromIndex) {
@@ -96,7 +98,7 @@ export default function BoardDetailsPage() {
       })
       return { fromArray: op1, toArray: op2 }
     }
-
+// Обновление задач после перемещения
   async function swapAndUpdateTask({from,to,toArr,fromArr,toIndex,fromIndex}){
     if (from.status == to.status) {
       const cloneArray = tasks[from.status]
@@ -108,6 +110,7 @@ export default function BoardDetailsPage() {
     }
     console.log({from,to,toArr,fromArr,toIndex,fromIndex})
     const { fromArray ,toArray}=swapDifferentArrayItems({fromArray:fromArr,toArray:toArr,fromIndex:fromIndex,toIndex:toIndex})
+    // Обновляем статусы в элементах
     const toElement = toArr[toIndex]
         toElement.status = from.status
         const fromElement = fromArr[fromIndex]
@@ -141,7 +144,7 @@ export default function BoardDetailsPage() {
           [to.status]:toArray
         }
   }
-
+// Финальная логика drop
     async function handleDrop() {
       const from = dragItemIndex.current
       const to = dragOvertItemIndex.current
@@ -160,9 +163,11 @@ export default function BoardDetailsPage() {
     setOpenModal(true)
     setSelectedTask(task)
   }
-
+ // Обновляем список задач после редактирования
   const handleUpdateTaskList = ({fromId,fromStatus,newTask}) => {
     const toStatus = newTask.status
+
+     // Если статус изменился
     if (fromStatus !== toStatus) {
       const removeTask = tasks[fromStatus]?.filter(task => task.id !== fromId)
       const addTask = tasks[toStatus]?.push(newTask)
@@ -173,6 +178,8 @@ export default function BoardDetailsPage() {
         [toStatus]:tasks[toStatus]
       }))
     }
+
+    // Если статус не изменился
     const updateTask = tasks[fromStatus]?.map(task => {
       if (task.id == fromId) {
         return newTask

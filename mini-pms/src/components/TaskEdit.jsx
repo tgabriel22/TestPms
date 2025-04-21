@@ -10,18 +10,18 @@ import {
     Box
   } from '@mui/material';
   import { useState, useEffect } from 'react';
-  // import { getAllBoards } from '../api/boardsService';
-  // import { getAllUsers } from '../api/usersService';
 import { updateTask } from '../api/tasksService';
 import { useNavigate } from "react-router";
 import { useAppData } from '../context/appDataContext';
 
+  // Возможные значения приоритета и статуса задачи
   const priorities = ['Low', 'Medium', 'High'];
   const statuses = ['Backlog', 'InProgress', 'Done'];
   
   export default function EditTaskModal({ open, onClose, boardId, updateTaskList, task = {}  }) {
     const navigate = useNavigate()
-    const {boards,users}= useAppData()
+    const {boards,users}= useAppData()// Получаем данные досок и пользователей из контекста
+    // Локальное состояние формы редактирования
     const [form, setForm] = useState({
       title: task?.title,
       description: task?.description,
@@ -33,15 +33,15 @@ import { useAppData } from '../context/appDataContext';
   
 console.log("users",users)
 
-
+    // Обновление задачи при сохранении изменений
     const handleUpdateTask = async () => {
        const response= await updateTask(task.id,form)
        updateTaskList({fromId:task.id,fromStatus:task.status,newTask:{...form,id:task.id, assignee:task.assignee}})
-       onClose()
+       onClose()// Закрываем модальное окно
        console.log("response form update task",response)
     }
     
-  
+  // Обработка изменений в полях формы
     const handleChange = (e) => {
       const { name, value } = e.target;
       setForm((prev) => ({ ...prev, [name]: value }));
