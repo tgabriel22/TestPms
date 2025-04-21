@@ -1,151 +1,221 @@
-// export default function TasksPage() {
-//     return <h2>🧾 All Tasks Page</h2>;
-//   }
-  // ---------------------------
-
-
-
-  // src/pages/TasksPage.jsx
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import {
-  Box,
-  Button,
-  TextField,
-  MenuItem,
-  Typography,
   Grid,
-  Card,
-  CardContent,
-  CircularProgress
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Button,
 } from '@mui/material';
 import { getAllTasks } from '../api/tasksService';
 import { getAllBoards } from '../api/boardsService';
-import { getAllUsers } from '../api/usersService';
-import { useTaskModal } from '../context/TaskModalContext';
+
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [boards, setBoards] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [boardFilter, setBoardFilter] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [assigneeSearch, setAssigneeSearch] = useState('');
+  const [assignees, setAssignees] = useState([]);
+  const [filters, setFilters] = useState({
+    search:"",
+    taskName: '',
+    assignee: '',
+    status: '',
+    board: '',
+  });
+  const [loading, setLoading] = useState(true);
 
-  const { openModal } = useTaskModal();
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+const filteredTasks = useMemo(()=>tasks.filter((task) => {
+    const searchValue = filters.search ? filters.search.toLowerCase() : '';
+    const matchesSearch =
+      !searchValue ||
+      task.title.toLowerCase().includes(searchValue) ||
+      (task.assignee?.fullName && task.assignee.fullName.toLowerCase().includes(searchValue));
+    return (
+      matchesSearch &&
+      (filters.assignee === '' || task.assignee?.fullName === filters.assignee) &&
+      (filters.status === '' || task.status === filters.status) &&
+      (filters.board === '' || task.boardName === filters.board)
+    );
+  }),[tasks, filters]);;
+  
+
+  const handleClearFilters = () => {
+    setFilters({
+      taskName: '',
+      assignee: '',
+      status: '',
+      board: '',
+    });
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        const [taskData, boardData, userData] = await Promise.all([
-          getAllTasks(),
-          getAllBoards(),
-          getAllUsers()
-        ]);
-        setTasks(taskData);
+        setLoading(true);
+        const taskData = await getAllTasks();
+        console.log('taskData', taskData);
+        setTasks(taskData.data);
+        const boardData = await getAllBoards();
+        console.log('boardData', boardData);
         setBoards(boardData);
-        setUsers(userData);
-      } catch (err) {
-        console.error('Error fetching data:', err.message);
+        
+      }catch (error) {
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    })();
   }, []);
 
-  const filteredTasks = tasks.filter((task) => {
-    return (
-      (statusFilter ? task.status === statusFilter : true) &&
-      (boardFilter ? task.boardId === parseInt(boardFilter) : true) &&
-      (searchTerm ? task.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
-      (assigneeSearch ? task.assignee?.fullName.toLowerCase().includes(assigneeSearch.toLowerCase()) : true)
-    );
-  });
-
-  if (loading) return <CircularProgress sx={{ mt: 4 }} />;
-
+  useEffect(() => {
+    if(assignees.length > 0) return; 
+    const uniqueAssignees = tasks.reduce((acc, task) => {
+      if (task.assignee && !acc.some((assignee) => assignee.id === task.assignee.id)) {
+        acc.push(task.assignee);
+      }
+      return acc;
+    }, []);
+    setAssignees(uniqueAssignees);
+  }, [tasks]);
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight="bold">Все задачи</Typography>
-        <Button variant="contained" onClick={() => openModal(null)}>
-          Создать задачу
-        </Button>
-      </Box>
-
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            label="Поиск по названию"
-            fullWidth
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            label="Поиск по исполнителю"
-            fullWidth
-            value={assigneeSearch}
-            onChange={(e) => setAssigneeSearch(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            select
-            label="Фильтр по статусу"
-            fullWidth
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <MenuItem value="">Все</MenuItem>
-            <MenuItem value="Backlog">Backlog</MenuItem>
-            <MenuItem value="InProgress">In Progress</MenuItem>
-            <MenuItem value="Done">Done</MenuItem>
-          </TextField>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            select
-            label="Фильтр по доске"
-            fullWidth
-            value={boardFilter}
-            onChange={(e) => setBoardFilter(e.target.value)}
-          >
-            <MenuItem value="">Все</MenuItem>
-            {boards.map((board) => (
-              <MenuItem key={board.id} value={board.id}>
-                {board.name}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={2}>
-        {filteredTasks.map((task) => (
-          <Grid item xs={12} key={task.id}>
-            <Card
-              sx={{ cursor: 'pointer' }}
-              onClick={() => openModal(task)}
-            >
-              <CardContent>
-                <Typography variant="h6">{task.title}</Typography>
-                <Typography color="text.secondary">{task.description}</Typography>
-                <Typography variant="body2" mt={1}>
-                  Статус: {task.status} | Приоритет: {task.priority}
-                </Typography>
-                <Typography variant="body2">
-                  Назначено: {task.assignee?.fullName || 'Не указано'}
-                </Typography>
-              </CardContent>
-            </Card>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        🧾 Task Management
+      </Typography>
+      <Paper sx={{ p: 3, mb: 3, boxShadow: 3 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={3}>
+            <TextField
+              label="Search (Task Name or Assignee)"
+              name="search"
+              value={filters.search}
+              onChange={(e) => {
+                const value = e.target.value.toLowerCase();
+                setFilters((prev) => ({
+                  ...prev,
+                  search: value,
+                }));
+              }}
+              fullWidth
+              variant="outlined"
+            />
           </Grid>
-        ))}
-      </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Status</InputLabel>
+              <Select
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+                label="Status"
+                sx={{ minWidth: 100 }}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="Backlog">Backlog</MenuItem>
+                <MenuItem value="InProgress">In Progress</MenuItem>
+                <MenuItem value="Done">Done</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Board</InputLabel>
+              <Select
+                name="board"
+                value={filters.board}
+                onChange={handleFilterChange}
+                label="Board"
+                sx={{ minWidth: 100 }}
+              >
+                <MenuItem value="">All</MenuItem>
+                {boards.map((board) => (
+                  <MenuItem key={board.id} value={board.name}>
+                    {board.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleClearFilters}
+              fullWidth
+              sx={{ mt: { xs: 2, md: 2 } }}
+            >
+              Clear Filters
+            </Button>
+          </Grid>
+        </Grid>
+      </Paper>
+      {loading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '50vh',
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <Typography variant="h5" gutterBottom>
+            Filtered Tasks
+          </Typography>
+          <Grid container spacing={2}>
+            {filteredTasks.map((task) => (
+              <Grid item xs={12} md={4} key={task.id}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    boxShadow: 3,
+                    borderRadius: 2,
+                    backgroundColor: '#f9f9f9',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                      boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                    },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {task.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    {task.description}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    <strong>Assignee:</strong> {task.assignee?.fullName || 'Unassigned'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    <strong>Status:</strong> {task.status}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Board:</strong> {task.boardName}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
     </Box>
-  );
+ );
 }
