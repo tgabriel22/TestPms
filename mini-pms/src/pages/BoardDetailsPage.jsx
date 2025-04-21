@@ -5,17 +5,16 @@ import {
   Paper,
   Typography,
   CircularProgress,
-  Box
+  Box,
+  AppBar,
+  Toolbar,
+  Button 
 } from '@mui/material';
 import { getBoardTasks } from '../api/boardsService';
 import {updateTask } from "../api/tasksService";
 import { useTaskModal } from '../context/TaskModalContext';
 import EditTaskModal from '../components/TaskEdit';
-
-
-
-
-// const COLUMNS = ['To do', 'In Progress', 'Done'];
+import TaskModal from '../components/TaskModal';
 
 
 function getTasksFilter(tasks){
@@ -28,7 +27,7 @@ function getTasksFilter(tasks){
 
 export default function BoardDetailsPage() {
   const { id } = useParams();
-  // const { openModal } = useTaskModal();
+
   const [openModal,setOpenModal]= useState(false)
   const [tasks, setTasks] = useState();
   const [loading, setLoading] = useState(true);
@@ -192,6 +191,7 @@ export default function BoardDetailsPage() {
       if (loading) return <CircularProgress sx={{ m: 3 }} />;
 
       return (
+        <>
         <Grid container spacing={2} sx={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
           {openModal && (
             <EditTaskModal
@@ -200,6 +200,8 @@ export default function BoardDetailsPage() {
               open={openModal}
               onClose={() => setOpenModal(false)}
               boardId={id}
+              backgroundColor="blue"
+              Box sx={{ border: 50 }}
             />
           )}
           {Object.keys(tasks).map((status) => (
@@ -209,16 +211,16 @@ export default function BoardDetailsPage() {
               md={3}
               key={status}
               sx={{
-                flex: '0 0 auto', // Prevent columns from shrinking
-                maxWidth: '300px', // Set a fixed width for each column
+                flex: '0 0 auto', 
+                maxWidth: '300px', 
               }}
             >
               <Paper
                 sx={{
                   p: 2,
                   minHeight: '80vh',
-                  backgroundColor: '#f4f5f7', // Light background for Kanban columns
-                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for columns
+                  backgroundColor: '#f4f5f7', 
+                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', 
                   borderRadius: 2,
                 }}
               >
@@ -282,142 +284,6 @@ export default function BoardDetailsPage() {
             </Grid>
           ))}
         </Grid>
+        </>
       );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// --------------------------------------------------------------------------------------------
-
-// import { useEffect, useState,useRef } from 'react';
-// import { useParams } from 'react-router-dom';
-// import {
-//   Grid,
-//   Paper,
-//   Typography,
-//   CircularProgress,
-//   Box
-// } from '@mui/material';
-// import { getBoardTasks } from '../api/boardsService';
-// import { useCancelableRequest } from '../hooks/useCancelableRequest';
-
-
-// const COLUMNS = ['Backlog', 'InProgress', 'Done'];
-
-// export default function BoardDetailsPage() {
-//   const { id } = useParams();
-//   const [tasks, setTasks] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const getSignal = useCancelableRequest();
-//   const dragItemIndex = useRef(null)
-//   const dragOvertItemIndex = useRef(null)
-
-
-//   useEffect(() => {
-//     const fetchTasks = async () => {
-//       try {
-//         const data = await getBoardTasks(id, getSignal());
-//         console.log("data",data)
-//         setTasks(data);
-//       } catch (err) {
-//         console.error('Error fetching tasks:', err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchTasks();
-//   }, [id]);
-
-//   console.log("tasks", tasks)
-
-//   function handleDragStart(index) {
-//     dragItemIndex.current = index
-//   }
-
-//   function handleDragOver(index) {
-//     dragOvertItemIndex.current=index
-//   }
-
-//   function handleDragEnd(){
-
-//   }
-
-//   function handleDrop() {
-//     const from = dragItemIndex.current
-//     const to = dragOvertItemIndex.current
-//     if (!from || !to) {
-//       return
-//     }
-//     const clone = [...tasks]
-//     const [movedItem] = clone.splice(from,1)
-//     clone.splice(to, 0, movedItem)
-//     setTasks(clone)
-//     dragItemIndex.current=null
-//     dragOvertItemIndex.current=null
-//   }
-
-//   const getTasksByStatus = (status) =>
-//     tasks.filter((task) => task.status === status);
-
-//   if (loading) return <CircularProgress sx={{ m: 3 }} />;
-
-//   return (
-//     <Grid container spacing={2}>
-//       {COLUMNS.map((status) => (
-//         <Grid item xs={12} md={2} key={status} >
-//           <Paper  sx={{ p: 2, minHeight: '80vh' }}>
-//             <Typography variant="h6" align="center" gutterBottom>
-//               {status}
-//             </Typography>
-//             <Box  sx={{ minHeight: '70vh' }}>
-//               {getTasksByStatus(status).map((task,index) => (
-//                 <Box
-//                   style={{padding:"2px", margin:"4px", border:"2px solid black"}}
-//                   draggable
-//                 onDragStart={()=>{handleDragStart(index)}}
-//                 onDragOver={()=>{handleDragOver(index)}}
-//                 onDragEnd={()=>{console.log("drag end")}}
-//                 onDrop={()=>{handleDrop()}}
-//                   key={task.id}
-
-//                   // sx={{
-//                   //   border: '1px solid #ccc',
-//                   //   borderRadius: 1,
-//                   //   p: 1,
-//                   //   mb: 1,
-//                   //   backgroundColor: 'green',
-//                   // }}
-//                 >
-//                   <Typography variant="subtitle1">{task.title}</Typography>
-//                   <Typography variant="body2" color="text.secondary">
-//                     {task.description}
-//                   </Typography>
-//                 </Box>
-//               ))}
-//             </Box>
-//           </Paper>
-//         </Grid>
-//       ))}
-//     </Grid>
-//   );
-// }
-// ---------------------------------------------------------------------------------------

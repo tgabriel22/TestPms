@@ -14,11 +14,14 @@ import {
 } from '@mui/material';
 import { getAllTasks } from '../api/tasksService';
 import { getAllBoards } from '../api/boardsService';
-
+import EditTaskModal from '../components/TaskEdit';
+import {updateTask } from "../api/tasksService";
+import { useAppData } from '../context/appDataContext';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([]);
-  const [boards, setBoards] = useState([]);
+  const [open,setOpen]=useState(false)
+  const [selectedTask,setSelectedTask]=useState({})
+  const {tasks,boards,loading}= useAppData()
   const [assignees, setAssignees] = useState([]);
   const [filters, setFilters] = useState({
     search:"",
@@ -27,7 +30,7 @@ export default function TasksPage() {
     status: '',
     board: '',
   });
-  const [loading, setLoading] = useState(true);
+  console.log({tasks})
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -51,6 +54,7 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
 
   const handleClearFilters = () => {
     setFilters({
+      search:"",
       taskName: '',
       assignee: '',
       status: '',
@@ -58,24 +62,7 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
     });
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const taskData = await getAllTasks();
-        console.log('taskData', taskData);
-        setTasks(taskData.data);
-        const boardData = await getAllBoards();
-        console.log('boardData', boardData);
-        setBoards(boardData);
-        
-      }catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+
 
   useEffect(() => {
     if(assignees.length > 0) return; 
@@ -87,11 +74,34 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
     }, []);
     setAssignees(uniqueAssignees);
   }, [tasks]);
+
+  const handleEditTask = (task) => {
+    setOpen(true)
+    setSelectedTask(task)
+  }
+  console.log({tasks,boards})
+
+  const handleUpdateTask = (task)=>{
+    tasks.map((item) => {
+      if(task.newTask.id ==item.id){
+        return task
+      }
+      return item
+    })
+  }
+console.log("rerender")
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        🧾 Task Management
+        🧾 Управление Задачами
       </Typography>
+      {open && <EditTaskModal 
+      open={open} 
+      onClose={()=>setOpen(false)} 
+      boardId={selectedTask.id} 
+      updateTaskList={(task)=>handleUpdateTask(task)} 
+      task = {selectedTask}
+      />}
       <Paper sx={{ p: 3, mb: 3, boxShadow: 3 }}>
         <Grid container spacing={2} alignItems="center" justifyContent="space-between">
           {/* Left side filters (TextField + Selects) */}
@@ -99,7 +109,7 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
                 <TextField
-                  label="Search (Task Name or Assignee)"
+                  label="Поиск (назв.. задач./исполни.)"
                   name="search"
                   value={filters.search}
                   onChange={(e) =>
@@ -111,16 +121,16 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth variant="outlined">
-                  <InputLabel>Status</InputLabel>
+                  <InputLabel>Статус</InputLabel>
                   <Select
                     name="status"
                     value={filters.status}
                     onChange={handleFilterChange}
-                    label="Status"
+                    label="status"
                     sx={{ minWidth: 100 }}
                   >
                     <MenuItem value="">All</MenuItem>
-                    <MenuItem value="Backlog">Backlog</MenuItem>
+                    <MenuItem value="Backlog">To do</MenuItem>
                     <MenuItem value="InProgress">In Progress</MenuItem>
                     <MenuItem value="Done">Done</MenuItem>
                   </Select>
@@ -128,7 +138,7 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth variant="outlined">
-                  <InputLabel>Board</InputLabel>
+                  <InputLabel>Доска</InputLabel>
                   <Select
                     name="board"
                     value={filters.board}
@@ -156,7 +166,7 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
               onClick={handleClearFilters}
               sx={{ mt: { xs: 2, md: 0 } }}
             >
-              Clear Filters
+              Очистить фильтры
             </Button>
           </Grid>
         </Grid>
@@ -176,18 +186,19 @@ const filteredTasks = useMemo(()=>tasks.filter((task) => {
       ) : (
         <>
           <Typography variant="h5" gutterBottom>
-            Filtered Tasks
+            Отфильтрованные задачи
           </Typography>
-          <Grid container spacing={2} backgroundColor="red">
+          <Grid container spacing={2} justifyContent="center" sx={{ px: 2 }}>
             {filteredTasks.map((task) => (
               <Grid item xs={12} md={4} key={task.id} backgroundColor="white">
                 <Paper 
+                onClick={()=>handleEditTask(task)}
                   sx={{
+                    width: '100%',
                     p: 2,
                     boxShadow: 3,
                     borderRadius: 2,
-                    // backgroundColor: '#f9f9f9',
-                    backgroundColor:"green",
+                    backgroundColor: '#f9f9f9',
                     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     '&:hover': {
                       transform: 'scale(1.02)',

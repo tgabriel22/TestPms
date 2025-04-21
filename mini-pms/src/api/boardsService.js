@@ -1,5 +1,4 @@
 
-//   --------------------------------
 import api from './axios';
 
 export const getAllBoards = () =>
@@ -7,9 +6,4 @@ export const getAllBoards = () =>
 
 export const getBoardTasks = (boardId) =>
   api.get(`/boards/${boardId}`).then(res => res.data.data);
-
-
-// -------------------------------------------
-
-
 

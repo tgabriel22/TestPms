@@ -12,9 +12,6 @@ export const createTask = (taskData) =>
 export const updateTask = (taskId, taskData) =>
   api.put(`/tasks/update/${taskId}`, taskData).then(res => res.data);
 
-// export const updateTaskStatus = (taskId, status) =>
-//   api.put(`/tasks/updateStatus/${taskId}`, { status }).then(res => res.data);
-
 export const updateTaskStatus = (taskId, newStatus) => {
   return api.put(`/tasks/updateStatus/${taskId}`, {
     status: newStatus,

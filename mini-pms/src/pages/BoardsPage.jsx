@@ -3,63 +3,16 @@ import { data, useNavigate } from 'react-router-dom';
 import { Card, CardContent, Typography, Grid, CircularProgress,Box } from '@mui/material';
 import { getAllBoards } from '../api/boardsService';
 import { getAllUsers } from '../api/usersService';
+import { useAppData } from '../context/appDataContext';
 
 
 
 export default function BoardsPage() {
-  const [boards, setBoards] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {boards,loading,users} = useAppData()
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
 
 
-// ------------------------------------------------
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getAllUsers();
-        console.log('Fetching users:', data);
-        setUsers(data);
-      } catch (err) {
-        if (err.name === 'AbortError') {
-          console.log('🛑 Users request canceled');
-          console.log('Error name:', err.name);
-        } else {
-          console.error('❌ Failed to load users:', err.message);
-        }
-      }
-    };
-  
-    fetchUsers();
-  }, []);
-
-
-// -------------------------------------------------------
-// Fetching all Projects(Boards)
-  useEffect(() => {
-    const fetchBoards = async () => {
-      try {
-        const data = await getAllBoards();
-        console.log('🔍 Fetched boards:', data);
-        console.log('Object keys:', Object.keys(data));
-          console.log("board",data)
-        if (Array.isArray(data)) {
-          setBoards(data);
-        } else {
-          console.error('Expected array but got:', data);
-          setBoards([]);
-        }
-      } catch (err) {
-        console.error('❌ Failed to fetch boards:', err.message);
-        setBoards([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchBoards();
-  }, []);
   
 
   // Loading indicator in case data is taking time to get fetched
@@ -91,7 +44,7 @@ export default function BoardsPage() {
                     {board.description || 'No description'}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 1 }}>
-                    🧩 Tasks: {board.taskCount}
+                    🧩 Задачи: {board.taskCount}
                   </Typography>
                 </CardContent>
               </Card>

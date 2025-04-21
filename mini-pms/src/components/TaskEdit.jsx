@@ -6,19 +6,22 @@ import {
     Button,
     TextField,
     MenuItem,
-    Grid
+    Grid,
+    Box
   } from '@mui/material';
   import { useState, useEffect } from 'react';
   import { getAllBoards } from '../api/boardsService';
   import { getAllUsers } from '../api/usersService';
-  import { updateTask } from '../api/tasksService';
-  
+import { updateTask } from '../api/tasksService';
+import { useNavigate } from "react-router";
+import { useAppData } from '../context/appDataContext';
+
   const priorities = ['Low', 'Medium', 'High'];
   const statuses = ['Backlog', 'InProgress', 'Done'];
   
   export default function EditTaskModal({ open, onClose, boardId, updateTaskList, task = {}  }) {
-    const [boards, setBoards] = useState([]);
-    const [users, setUsers] = useState([]);
+    const navigate = useNavigate()
+    const {boards,users}= useAppData()
     const [form, setForm] = useState({
       title: task?.title,
       description: task?.description,
@@ -27,38 +30,8 @@ import {
       assigneeId: task.assignee.id,
       boardId: boardId,
     });
-
-    useEffect(() => {
-        const fetchBoards = async () => {
-          try {
-            const data = await getAllBoards();
-            if (Array.isArray(data)) {
-              setBoards(data);
-            } else {
-              console.error('Expected array but got:', data);
-            }
-          } catch (err) {
-            console.error('❌ Failed to fetch boards:', err.message);
-          }
-        };
-    
-        fetchBoards();
-    }, []);
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-          try {
-            const data = await getAllUsers();
-            setUsers(data);
-          } catch (err) {
-            console.error('Failed to fetch users:', err.message);
-          }
-        };
-    
-        fetchUsers();
-      }, []);
   
-
+console.log("users",users)
 
 
     const handleUpdateTask = async () => {
@@ -76,12 +49,12 @@ import {
   
     return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle>{form.id ? 'Edit Task' : 'Create Task'}</DialogTitle>
+        <DialogTitle>{form.id ? 'Edit Task' : 'Редактировать Задачу'}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} mt={0.5}>
             <Grid item xs={12}>
               <TextField
-                label="Title"
+                label="Название"
                 name="title"
                 fullWidth
                 value={form.title}
@@ -91,7 +64,7 @@ import {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Description"
+                label="Описание"
                 name="description"
                 multiline
                 rows={4}
@@ -104,7 +77,7 @@ import {
             <Grid item xs={6}>
               <TextField
                 select
-                label="Priority"
+                label="Приоритет"
                 name="priority"
                 fullWidth
                 value={form.priority}
@@ -120,7 +93,7 @@ import {
             <Grid item xs={6}>
               <TextField
                 select
-                label="Status"
+                label="Статус"
                 name="status"
                 fullWidth
                 value={form.status}
@@ -137,14 +110,14 @@ import {
             <Grid item xs={12}>
               <TextField
                 select
-                label="Assignee"
+                label="Исполнитель"
                 name="assigneeId"
                 fullWidth
                 value={form.assigneeId}
                 onChange={handleChange}
                 sx={{ minWidth: 115 }}
               >
-                {users.map((user) => (
+                {users?.map((user) => (
                   <MenuItem key={user.id} value={user.id}>
                     {user.fullName}
                   </MenuItem>
@@ -155,14 +128,14 @@ import {
             <Grid item xs={12}>
               <TextField
                 select
-                label="Project (Board)"
+                label="Проект"
                 name="boardId"
                 value={form.boardId}
                 onChange={handleChange}
                 sx={{ minWidth: 150 }}
                 fullWidth
               >
-                {boards.map((board) => (
+                {boards?.map((board) => (
                   <MenuItem key={board.id} value={board.id}>
                     {board.name}
                   </MenuItem>
@@ -171,13 +144,30 @@ import {
             </Grid>
           </Grid>
         </DialogContent>
-  
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button variant="contained" onClick={handleUpdateTask}>
-            Update
-          </Button>
-        </DialogActions>
+
+<DialogActions>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      width: '100%',
+    }}
+  >
+    <Button variant="contained" onClick={() => navigate(`/board/${boardId}`)}>
+    Перейти к доску
+    </Button>
+
+    <Box>
+      <Button onClick={onClose} sx={{ mr: 1 }}>
+        Отменить
+      </Button>
+      <Button variant="contained" onClick={handleUpdateTask}>
+        обновить
+      </Button>
+    </Box>
+  </Box>
+</DialogActions>
+
       </Dialog>
     );
   }

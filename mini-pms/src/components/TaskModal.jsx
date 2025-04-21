@@ -12,56 +12,27 @@ import { useState, useEffect } from 'react';
 import { getAllBoards } from '../api/boardsService';
 import { getAllUsers } from '../api/usersService';
 import { createTask } from '../api/tasksService';
+import { useOutletContext } from "react-router-dom";
+import { useAppData } from '../context/appDataContext';
 
 
 const priorities = ['Low', 'Medium', 'High'];
 const statuses = ['Backlog', 'InProgress', 'Done'];
 
 export default function TaskModal() {
-  const [boards, setBoards] = useState([]);
-  const [users, setUsers] = useState([]);
+  const {boards,users}= useAppData()
+
   const [open,setOpen]= useState(false)
   const [form, setForm] = useState({
     title: '',
     description: '',
-    priority: 'Medium',
-    status: 'Backlog',
+    priority: '',
+    status: '',
     assigneeId: '',
     boardId: '',
   });
 
 
-  
-  
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getAllUsers();
-        setUsers(data);
-      } catch (err) {
-        console.error('Failed to fetch users:', err.message);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    const fetchBoards = async () => {
-      try {
-        const data = await getAllBoards();
-        if (Array.isArray(data)) {
-          setBoards(data);
-        } else {
-          console.error('Expected array but got:', data);
-        }
-      } catch (err) {
-        console.error('❌ Failed to fetch boards:', err.message);
-      }
-    };
-
-    fetchBoards();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,16 +51,29 @@ export default function TaskModal() {
 
   return (
     <>
-    <Button color="inherit" onClick={()=>setOpen(true)}>
+    <Button 
+    color="inherit"
+    onClick={() => {
+      setForm({
+        title: '',
+        description: '',
+        priority: '',
+        status: '',
+        assigneeId: '',
+        boardId: '',
+          });
+          setOpen(true);
+        }}
+      >
             + Создать задачу
     </Button>
     <Dialog open={open} onClose={()=>setOpen(false)}  fullWidth maxWidth="sm">
-      <DialogTitle > Create Task</DialogTitle>
+      <DialogTitle >  Создать Задачу</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2} mt={0.5}>
           <Grid item xs={12}>
             <TextField
-              label="Title"
+              label="Название"
               name="title"
               fullWidth
               value={form.title}
@@ -99,7 +83,7 @@ export default function TaskModal() {
           </Grid>
           <Grid item xs={12}>
             <TextField
-              label="Description"
+              label="Описание"
               name="description"
               multiline
               rows={4}
@@ -112,8 +96,9 @@ export default function TaskModal() {
           <Grid item xs={6}>
             <TextField
               select
-              label="Priority"
+              label="Приоритет"
               name="priority"
+              sx={{ minWidth: 150 }}
               fullWidth
               value={form.priority}
               onChange={handleChange}
@@ -128,8 +113,9 @@ export default function TaskModal() {
           <Grid item xs={6}>
             <TextField
               select
-              label="Status"
+              label="Статус"
               name="status"
+              sx={{ minWidth: 150 }}
               fullWidth
               value={form.status}
               onChange={handleChange}
@@ -145,14 +131,14 @@ export default function TaskModal() {
           <Grid item xs={12}>
             <TextField
               select
-              label="Assignee"
+              label="Исполнитель"
               name="assigneeId"
               fullWidth
               value={form.assigneeId}
               onChange={handleChange}
               sx={{ minWidth: 115 }}
             >
-              {users.map((user) => (
+              {users?.map((user) => (
                 <MenuItem key={user.id} value={user.id}>
                   {user.fullName}
                 </MenuItem>
@@ -163,14 +149,14 @@ export default function TaskModal() {
           <Grid item xs={12}>
             <TextField
               select
-              label="Project (Board)"
+              label="Проект"
               name="boardId"
               value={form.boardId}
               onChange={handleChange}
               sx={{ minWidth: 150 }}
               fullWidth
             >
-              {boards.map((board) => (
+              {boards?.map((board) => (
                 <MenuItem key={board.id} value={board.id}>
                   {board.name}
                 </MenuItem>
@@ -181,9 +167,9 @@ export default function TaskModal() {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={()=>setOpen(false)}>Cancel</Button>
+        <Button onClick={()=>setOpen(false)}>отменить</Button>
         <Button onClick={handleSubmit} variant="contained" >
-         Create
+         Создать
         </Button>
       </DialogActions>
     </Dialog>
